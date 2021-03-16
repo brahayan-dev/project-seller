@@ -1,0 +1,22 @@
+{
+  "name": "app",
+  "version": "1.0.0",
+  "description": "",
+  "private": true,
+  "scripts": {
+    "repl": "shadow-cljs node-repl",
+    "serve": "shadow-cljs watch app",
+    "test": "shadow-cljs compile test",
+    "build": "shadow-cljs release app",
+    "build:local": "rm -r public/assets && shadow-cljs release app"
+  },
+  "author": "",
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "shadow-cljs": "^2.11.23"
+  },
+  "dependencies": {
+    "react": "^17.0.1",
+    "react-dom": "^17.0.1"
+  }
+}
