@@ -6,21 +6,23 @@
             [components.select :as select]
             [components.label :as label]
             [components.input :as input]
+            [components.alert :as alert]
             [settings.api :as api]))
 
 (defn ^:private init-state
   []
   {::methods []
-   ::loading-methods? true
-   ::sending-requiest? false
+   ::error-messages []
    ::creation-success? false
+   ::sending-requiest? false
+   ::loading-methods? true
    ::form {:buyerPhone ""
            :buyerEmail ""
            :buyerFullName ""
            :shippingAddress ""
            :shippingCountry ""
            :shippingRegion ""
-           :shippingMethodId ""
+           :shippingMethodId "1"
            :shippingCity ""
            :sellerStore ""
            :externalOrderNumber ""
@@ -56,10 +58,11 @@
   [data]
   (swap! state assoc ::sending-requiest? true)
   (http/POST (api/base-url "/sales")
-    {:body data
-     :error-handler #(js/console.error %)
+    {:params data
+     :format :json
      :handler #(swap! state assoc ::creation-success? true)
      :finally #(swap! state assoc ::sending-requiest? false)
+     :error-handler #(swap! state assoc ::error-messages (-> % :response :errors))
      :response-format (http/json-response-format {:keywords? true})}))
 
 (defn ^:private update-field!
@@ -101,6 +104,11 @@
                     [:td (:quantity product)]
                     [:td (:weight product)]])]]]))
 
+(defn ^:private v-errors
+  []
+  (alert/render (-> alert/component
+                    (assoc alert/messages (->> @state ::error-messages (map :msg))))))
+
 (defn ^:private v-ready
   []
   [:section.container
@@ -112,6 +120,7 @@
                         (assoc button/label "Crear orden")
                         (assoc button/loading? (get @state ::sending-requiest?))
                         (assoc button/on-click #(-> @state ::form send-data))))]]
+   (when (-> @state ::error-messages seq) (v-errors))
    [:div.columns
     [:div.column (v-form [{:text "Tienda del vendedor" :is :sellerStore}
                           {:text "Número de orden externo" :is :externalOrderNumber}
