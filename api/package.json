@@ -10,9 +10,11 @@
   "author": "Brahayan Suárez",
   "license": "UNLICENSED",
   "devDependencies": {
+    "@types/cors": "^2.8.10",
     "@types/express": "^4.17.11",
     "@types/faker": "^5.1.7",
     "@types/lodash": "^4.14.168",
+    "kill-port": "^1.6.1",
     "nodemon": "^2.0.7",
     "ts-loader": "^8.0.18",
     "typescript": "^4.2.3",
@@ -21,6 +23,8 @@
   },
   "dependencies": {
     "axios": "^0.21.1",
+    "cors": "^2.8.5",
+    "dayjs": "^1.10.4",
     "express": "^4.17.1",
     "express-validator": "^6.10.0",
     "faker": "^5.4.0",

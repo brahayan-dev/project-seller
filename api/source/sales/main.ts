@@ -7,6 +7,6 @@ const router = Router();
 
 router.get("/", read.every);
 router.get("/:saleId", read.detail);
-router.post("/", create.entity);
+router.post("/", create.entityValidation, create.entity);
 
 export default router;

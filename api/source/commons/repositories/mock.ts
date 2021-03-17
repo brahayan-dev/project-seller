@@ -1,24 +1,49 @@
 import _ from "lodash";
+import dayjs from "dayjs";
 import faker from "faker";
 import store from "store2";
-
-faker.locale = "es_MX";
-
-const amountOfRecords = 11;
-const $orders = store.namespace("orders");
+import { orderCode } from "@/helpers/toolkit";
 
 type ShippingMethod = {
   name: string;
+  id: string;
+};
+
+type NewOrder = {
+  sellerStore: string;
+  shippingMethodId: string;
+  buyerPhone: string;
+  buyerEmail: string;
+  buyerFullName: string;
+  shippingAddress: string;
+  shippingCountry: string;
+  shippingRegion: string;
+  shippingCity: string;
+  externalOrderNumber: string;
+  products: object[];
+};
+
+faker.locale = "es";
+
+const amountOfRecords = 11;
+const $orders = store.namespace("orders");
+const $shipments = store.namespace("shipments");
+
+const generateIdEnhanced = (id: number) => {
+  return `${id}-${Date.now()}-${_.random(0, $orders.size())}`;
 };
 
 export const orders = {
   load(): void {
     _.range(1, amountOfRecords).forEach((id) => {
-      $orders.set(id, {
-        id,
-        createdAt: faker.date.recent(2),
+      const idEnhanced = generateIdEnhanced(id);
+
+      $orders.set(idEnhanced, {
+        id: idEnhanced,
+        createdAt: dayjs(faker.date.recent(7)).format("YYYY-MM-DD"),
         sellerStore: faker.company.companyName(),
-        sellOrderNumber: faker.random.uuid(),
+        sellOrderNumber: orderCode(),
+        shippingMethodId: null,
         shippingMethod: null,
       });
     });
@@ -26,24 +51,36 @@ export const orders = {
   list(): object[] {
     return Object.values($orders.getAll());
   },
-  show(id: number): object {
+  show(id: string): object {
     return $orders.get(id);
   },
   seed(shippingMethods: ShippingMethod[]): void {
     Object.values($orders.getAll()).forEach((order) => {
-      const { name } = faker.random.arrayElement(shippingMethods);
+      const { name, id } = faker.random.arrayElement(shippingMethods);
+
+      shippingMethods.forEach((shipping) => {
+        $shipments.set(shipping.id, shipping.name);
+      });
 
       $orders.set(order.id, {
         ...order,
         shippingMethod: name,
+        shippingMethodId: id,
       });
     });
   },
-  write() {
-    const id = $orders.size() + 1;
+  write(newSellOrder: NewOrder) {
+    const id = generateIdEnhanced($orders.size() + 2);
+    const order = {
+      ...newSellOrder,
+      sellOrderNumber: orderCode(),
+      createdAt: dayjs().format("YYYY-MM-DD"),
+      shippingMethod: $shipments.get(newSellOrder.shippingMethodId),
+      id,
+    };
 
-    return $orders.get(id, {
-        // TODO: add type and implementation
-    });
+    $orders.set(id, order);
+
+    return order;
   },
 };
