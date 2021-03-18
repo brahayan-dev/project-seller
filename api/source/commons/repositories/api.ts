@@ -20,7 +20,23 @@ export const getShippingMethods = async () => {
   }
 };
 
-export const getShippingMethodDetail = async (id: number) => {
+export type MethodDetail = {
+  data: {
+    rules: {
+      availability: {
+        byWeight: {
+          min: number;
+          max: number;
+        };
+      };
+    };
+  };
+  error?: object;
+};
+
+export const getShippingMethodDetail = async (
+  id: string
+): Promise<MethodDetail> => {
   try {
     const { data } = await melonn.get(`shipping-methods/${id}`);
 
